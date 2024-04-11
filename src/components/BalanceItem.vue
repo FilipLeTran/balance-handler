@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
+import convertDate from '../utilities/ConvertDate.ts'
 
 defineProps<{
   eventId?: string
-  date?: string
+  date?: number
   customerId?: string
   balanceValue?: number
   eventType?: string
@@ -23,7 +24,9 @@ const balanceContainerClass = ref('balance-container')
     </div>
     <div>
       <h3>Date</h3>
-      <p>{{ date }}</p>
+      <p>
+        {{ convertDate(date) }}
+      </p>
     </div>
     <div>
       <h3>Customer ID</h3>

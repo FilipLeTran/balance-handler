@@ -1,11 +1,14 @@
 <template>
+  <p>Opening balance: {{ openingBalance }}</p>
+  <p>Closing balance: {{ closingBalance }}</p>
+  <p>Difference: {{ differenceBalance }}</p>
   <div v-for="data in balanceData" v-bind:key="data.id" class="balance-events">
     <BalanceItem
       :eventId="data.id"
-      :date="data.date"
+      :date="data.time"
       :customerId="data.customerId"
-      :balanceValue="data.balance"
-      :eventType="data.eventType"
+      :balanceValue="data.value"
+      :eventType="data.type"
     />
   </div>
 </template>
@@ -26,8 +29,27 @@ export default defineComponent({
     const isLoading = ref<boolean>(false)
     const error = ref<string | null>(null)
 
+    const openingBalance = ref(0)
+    const closingBalance = ref(0)
+    const differenceBalance = ref(openingBalance.value - closingBalance.value)
+
     const setBalanceData = (newValue: any) => {
       balanceData.value = newValue
+
+      // refactor this later
+      let newOpeningBalance = 0
+      let newClosingBalance = 0
+      for (const index in balanceData.value) {
+        const data = balanceData.value[index]
+        if (data.type === 'INCREASED') {
+          newOpeningBalance += data.value
+        } else if (data.type === 'DECREASED') {
+          newClosingBalance += data.value
+        }
+      }
+      openingBalance.value = newOpeningBalance
+      closingBalance.value = newClosingBalance
+      differenceBalance.value = Math.abs(newOpeningBalance - newClosingBalance)
     }
 
     const fetchFromAPI = async () => {
@@ -46,7 +68,10 @@ export default defineComponent({
     return {
       balanceData,
       isLoading,
-      error
+      error,
+      openingBalance,
+      closingBalance,
+      differenceBalance
     }
   }
 })
