@@ -1,8 +1,15 @@
 <script setup lang="ts">
 import BalanceView from './components/BalanceView.vue'
+import SelectionToast from './components/SelectionToast.vue'
 </script>
 
 <template>
+  <div>
+    <h3>Start date</h3>
+    <SelectionToast />
+    <h3>End date</h3>
+    <SelectionToast />
+  </div>
   <BalanceView />
 </template>
 
