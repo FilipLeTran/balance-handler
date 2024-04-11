@@ -18,10 +18,14 @@ const app = initializeApp(firebaseConfig)
 
 const db = getDatabase(app)
 
-export async function fetchDataFromFirebase(path: string): Promise<any> {
+export async function fetchDataFromFirebase(
+  path: string,
+  setValue: (newValue: any) => void
+): Promise<any> {
   const balanceRef = ref(db, `/${path}`)
   onValue(balanceRef, (snapshot) => {
     console.log('test: ', snapshot.val())
+    setValue(snapshot.val())
     return snapshot.val()
   })
 }
