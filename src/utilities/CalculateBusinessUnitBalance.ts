@@ -1,6 +1,7 @@
-export default function CalculateBusinessUnitBalance(
+export default function calculateBusinessUnitBalance(
   inputSet: Set<String>,
-  balanceData: { value: any[] }
+  balanceData: { value: any[] },
+  period: string
 ) {
   const units: {
     name: any
@@ -8,6 +9,8 @@ export default function CalculateBusinessUnitBalance(
     closingBalance: number
     differenceBalance: number
   }[] = []
+
+  const date = period.split('-')
 
   inputSet.forEach((businessUnitCode: any) => {
     const filteredUnits = balanceData.value.filter(

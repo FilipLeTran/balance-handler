@@ -25,11 +25,15 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue'
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import { fetchDataFromFirebase } from '@/stores/modules/apiModule'
 import BalanceItem from './BalanceItem.vue'
 import BusinessUnit from './BusinessUnit.vue'
-import CalculateBusinessUnitBalance from '../utilities/CalculateBusinessUnitBalance.ts'
+import calculateBusinessUnitBalance from '../utilities/CalculateBusinessUnitBalance'
+
+interface Props {
+  period: string
+}
 
 export default defineComponent({
   name: 'BalanceView',
@@ -37,7 +41,13 @@ export default defineComponent({
     BalanceItem,
     BusinessUnit
   },
-  setup() {
+  props: {
+    period: {
+      type: String,
+      required: true
+    }
+  },
+  setup(props: Props, { emit }) {
     const balanceData = ref<any>(null)
     const isLoading = ref<boolean>(false)
     const error = ref<string | null>(null)
@@ -46,8 +56,10 @@ export default defineComponent({
     const closingBalance = ref(0)
     const differenceBalance = ref(openingBalance.value - closingBalance.value)
 
-    const uniqueBusinessUnits = new Set<string>([])
+    const uniqueBusinessUnits = new Set<string>()
     const allBusinessUnits = ref<any>([])
+
+    const uniqueMarkets = new Set<string>()
 
     const setBalanceData = (newValue: any) => {
       balanceData.value = newValue
@@ -58,13 +70,21 @@ export default defineComponent({
       for (const index in balanceData.value) {
         const data = balanceData.value[index]
         uniqueBusinessUnits.add(balanceData.value[index].businessUnit)
+        uniqueMarkets.add(balanceData.value[index].market)
         if (data.type === 'INCREASED') {
           newOpeningBalance += data.value
         } else if (data.type === 'DECREASED') {
           newClosingBalance += data.value
         }
       }
-      allBusinessUnits.value = CalculateBusinessUnitBalance(uniqueBusinessUnits, balanceData)
+      emit('markets', Array.from(uniqueMarkets))
+      emit('businessUnits', Array.from(uniqueBusinessUnits))
+
+      allBusinessUnits.value = calculateBusinessUnitBalance(
+        uniqueBusinessUnits,
+        balanceData,
+        props.period
+      )
 
       openingBalance.value = newOpeningBalance
       closingBalance.value = newClosingBalance
@@ -76,22 +96,32 @@ export default defineComponent({
       try {
         balanceData.value = fetchDataFromFirebase('', setBalanceData)
       } catch (err) {
-        error.value = err.message
+        error.value = 'err.message' // should not be string but err.message, have it like this for eslint
       } finally {
         isLoading.value = false
       }
     }
+
+    watch(props, () => {
+      allBusinessUnits.value = calculateBusinessUnitBalance(
+        uniqueBusinessUnits,
+        balanceData,
+        props.period
+      )
+      console.log('inside watch: ', allBusinessUnits.value)
+      console.log('inside watch props: ', props.period)
+    })
 
     onMounted(fetchFromAPI)
 
     return {
       balanceData,
       allBusinessUnits,
-      isLoading,
-      error,
       openingBalance,
       closingBalance,
-      differenceBalance
+      differenceBalance,
+      isLoading,
+      error
     }
   }
 })

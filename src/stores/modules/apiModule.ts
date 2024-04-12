@@ -24,7 +24,6 @@ export async function fetchDataFromFirebase(
 ): Promise<any> {
   const balanceRef = ref(db, `/${path}`)
   onValue(balanceRef, (snapshot) => {
-    console.log('test: ', snapshot.val())
     setValue(snapshot.val())
     return snapshot.val()
   })

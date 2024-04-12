@@ -1,17 +1,49 @@
 <script setup lang="ts">
+import { ref } from 'vue'
 import BalanceView from './components/BalanceView.vue'
 import SelectionToast from './components/SelectionToast.vue'
+const period = ref('2024-04')
+const markets = ref<any>([])
+const businessUnits = ref<any>([])
+
+const updatePeriod = (newPeriod: string) => {
+  period.value = newPeriod
+  console.log(period.value)
+}
+const handleMarkets = (newMarkets: string[]) => {
+  markets.value = newMarkets
+}
+const handleBusinessUnits = (newBusinessUnits: string[]) => {
+  businessUnits.value = newBusinessUnits
+  console.log('In App function: ', businessUnits.value)
+}
 </script>
 
 <template>
   <div>
-    <h3>Start date</h3>
-    <SelectionToast />
-    <h3>End date</h3>
-    <SelectionToast />
+    <header class="selection-area">
+      <SelectionToast :itemList="markets">Market</SelectionToast>
+      <span>
+        <h2>Period:</h2>
+        <input
+          type="month"
+          min="2023-09"
+          max="2025-01"
+          v-model="period"
+          @change="
+            (event) => {
+              updatePeriod(event.target.value)
+            }
+          "
+        />
+      </span>
+      <SelectionToast :itemList="businessUnits">Business Unit</SelectionToast>
+    </header>
+    <BalanceView :period="period" @markets="handleMarkets" @business-units="handleBusinessUnits" />
   </div>
-  <BalanceView />
 </template>
+
+<script lang="ts"></script>
 
 <style scoped>
 header {
@@ -19,9 +51,19 @@ header {
   max-height: 100vh;
 }
 
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
+div {
+  display: flex;
+  flex-direction: column;
+  justify-items: center;
+  align-items: center;
+}
+
+.selection-area {
+  margin: 1rem;
+}
+
+.selection-area h2 {
+  margin: 0 1rem;
 }
 
 nav {
