@@ -1,46 +1,64 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import BalanceView from './components/BalanceView.vue'
-import SelectionToast from './components/SelectionToast.vue'
-const period = ref('2024-04')
+import { ref, inject } from 'vue'
+import BalanceView from './views/BalanceView.vue'
+import SelectionView from './views/SelectionView.vue'
+import Provider from './components/Provider.vue'
+
+const period = ref('2024-02')
 const markets = ref<any>([])
 const businessUnits = ref<any>([])
+const customers = ref<any>([])
+const selectedRetailUnit = ref('')
+const selectedBusinessUnit = ref('')
+const selectedCustomer = ref('')
 
-const updatePeriod = (newPeriod: string) => {
-  period.value = newPeriod
-  console.log(period.value)
-}
 const handleMarkets = (newMarkets: string[]) => {
   markets.value = newMarkets
 }
 const handleBusinessUnits = (newBusinessUnits: string[]) => {
   businessUnits.value = newBusinessUnits
-  console.log('In App function: ', businessUnits.value)
+}
+const handleCustomers = (newCustomers: string[]) => {
+  customers.value = newCustomers
+}
+const handleNewPeriod = (newPeriod: string) => {
+  period.value = newPeriod
+}
+const handleSelectedBusinessUnit = (newBusinessUnit: string) => {
+  selectedBusinessUnit.value = newBusinessUnit
+}
+const handleSelectedRetailUnit = (newRetailUnit: string) => {
+  selectedRetailUnit.value = newRetailUnit
+}
+
+const handleSelectedCustomer = (newCustomer: string) => {
+  selectedCustomer.value = newCustomer
 }
 </script>
 
 <template>
-  <div>
-    <header class="selection-area">
-      <SelectionToast :itemList="markets">Market</SelectionToast>
-      <span>
-        <h2>Period:</h2>
-        <input
-          type="month"
-          min="2023-09"
-          max="2025-01"
-          v-model="period"
-          @change="
-            (event) => {
-              updatePeriod(event.target.value)
-            }
-          "
-        />
-      </span>
-      <SelectionToast :itemList="businessUnits">Business Unit</SelectionToast>
-    </header>
-    <BalanceView :period="period" @markets="handleMarkets" @business-units="handleBusinessUnits" />
-  </div>
+  <Provider>
+    <div>
+      <SelectionView
+        :markets="markets"
+        :businessUnits="businessUnits"
+        :customers="customers"
+        @new-period="handleNewPeriod"
+        @new-retail-unit="handleSelectedRetailUnit"
+        @new-business-unit="handleSelectedBusinessUnit"
+        @new-customer="handleSelectedCustomer"
+      />
+      <BalanceView
+        :period="period"
+        :selectedBusinessUnit="selectedBusinessUnit"
+        :selectedRetailUnit="selectedRetailUnit"
+        :selectedCustomer="selectedCustomer"
+        @markets="handleMarkets"
+        @business-units="handleBusinessUnits"
+        @customers="handleCustomers"
+      />
+    </div>
+  </Provider>
 </template>
 
 <script lang="ts"></script>
