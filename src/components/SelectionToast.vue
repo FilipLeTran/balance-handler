@@ -40,15 +40,20 @@ const marketOnlyCustomers = computed(() => {
 </script>
 
 <template>
-  <span>
+  <span class="selection-toast">
     <h2><slot></slot></h2>
-    <select v-if="itemType !== 'customers'" id="selection" v-model="selectedOption">
+    <select
+      v-if="itemType !== 'customers'"
+      v-model="selectedOption"
+      :name="itemType"
+      :class="itemType"
+    >
       <option value="" selected>All</option>
       <option v-for="(item, index) in itemList" :key="`${item}${index}`" :value="item">
         {{ item }}
       </option>
     </select>
-    <select v-else id="selection" v-model="selectedOption">
+    <select v-else v-model="selectedOption" :name="itemType" :class="itemType">
       <option value="" selected>All</option>
       <option v-for="(item, index) in marketOnlyCustomers" :key="`${item}${index}`" :value="item">
         {{ item }}
@@ -62,3 +67,22 @@ export default defineComponent({
   name: 'SelectionToast'
 })
 </script>
+
+<style scoped>
+.selection-toast {
+  display: flex;
+  flex-direction: column;
+  margin: 1rem;
+}
+
+.selection-toast select {
+  min-width: 150px;
+  min-height: 50px;
+  font-size: large;
+}
+
+.selection-toast select option {
+  min-height: 50px;
+  font-size: large;
+}
+</style>

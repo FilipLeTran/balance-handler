@@ -1,14 +1,11 @@
+import { type IBalanceValue } from '@/components/Interfaces'
+
 export default function calculateBusinessUnitBalance(
   inputSet: Set<String>,
   balanceData: any[],
   market: string
-) {
-  const units: {
-    name: any
-    openingBalance: number
-    closingBalance: number
-    differenceBalance: number
-  }[] = []
+): IBalanceValue[] {
+  const units: IBalanceValue[] = []
 
   inputSet.forEach((businessUnitCode: any) => {
     // gets all balance events that is of the same business unit

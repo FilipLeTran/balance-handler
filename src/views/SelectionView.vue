@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, defineProps, inject, computed, watch } from 'vue'
+import { ref, defineProps, inject, computed } from 'vue'
 import { type IGlobalState } from '@/components/Interfaces'
 import SelectionToast from '../components/SelectionToast.vue'
 
@@ -52,15 +52,19 @@ const updateCustomer = (newCustomer: string) => {
       >Market</SelectionToast
     >
     <span>
-      <h2>Period:</h2>
+      <h2>Period</h2>
       <input
         type="month"
         min="2023-09"
         max="2024-02"
         v-model="period"
+        :id="period"
+        name="period"
         @change="
           (event) => {
-            updatePeriod(event.target.value)
+            const target = event.target as HTMLInputElement | null
+            if (!target || target.value === null) return
+            updatePeriod(target.value)
           }
         "
       />
@@ -81,3 +85,11 @@ const updateCustomer = (newCustomer: string) => {
     >
   </header>
 </template>
+
+<style scoped>
+input {
+  font-size: large;
+  min-height: 50px;
+  min-width: 200px;
+}
+</style>

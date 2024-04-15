@@ -1,10 +1,5 @@
-import convertDate from './ConvertDate'
-
-export default function filterBalanceByPeriod(
-  balanceData: { value: any[] },
-  period: string | undefined
-) {
-  const selectedPeriod = period?.split('-')
+export default function filterBalanceByPeriod(balanceData: { value: any[] }, period: string) {
+  const selectedPeriod = period.split('-')
   const year = Number(selectedPeriod[0])
   const month = Number(selectedPeriod[1])
 

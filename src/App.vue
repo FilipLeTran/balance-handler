@@ -1,16 +1,17 @@
 <script setup lang="ts">
-import { ref, inject } from 'vue'
+import { ref } from 'vue'
 import BalanceView from './views/BalanceView.vue'
 import SelectionView from './views/SelectionView.vue'
 import Provider from './components/Provider.vue'
+import { type IBalance } from './components/Interfaces'
 
 const period = ref('2024-02')
-const markets = ref<any>([])
-const businessUnits = ref<any>([])
-const customers = ref<any>([])
-const selectedRetailUnit = ref('')
-const selectedBusinessUnit = ref('')
-const selectedCustomer = ref('')
+const markets = ref<string[]>([])
+const businessUnits = ref<string[]>([])
+const customers = ref<string[]>([])
+const selectedRetailUnit = ref<string>('')
+const selectedBusinessUnit = ref<string>('')
+const selectedCustomer = ref<string>('')
 
 const handleMarkets = (newMarkets: string[]) => {
   markets.value = newMarkets

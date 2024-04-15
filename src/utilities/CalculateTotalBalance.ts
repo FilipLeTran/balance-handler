@@ -1,4 +1,4 @@
-export default function calculateTotalBalance(allBusinessUnits: { value: any[] }) {
+export default function calculateTotalBalance(allBusinessUnits: { value: any[] }): number[] {
   let newOpeningBalance = 0
   let newClosingBalance = 0
   allBusinessUnits.value.forEach((businessUnitAggregation: any) => {

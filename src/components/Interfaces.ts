@@ -8,3 +8,22 @@ export interface IGlobalState {
   setPeriod: (period: string) => void
   setRegionCustomers: (regionCustomers: string[]) => void
 }
+
+export interface IBalance {
+  id: string
+  time: number
+  market: string
+  customerId: string
+  reason: string
+  reasonTime: number
+  businessUnit: string
+  type: string
+  value: number
+}
+
+export interface IBalanceValue {
+  name: string
+  openingBalance: number
+  closingBalance: number
+  differenceBalance: number
+}

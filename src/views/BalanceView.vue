@@ -1,8 +1,8 @@
 <template>
   <div>
-    <p>Opening balance: {{ openingBalance }}</p>
-    <p>Closing balance: {{ closingBalance }}</p>
-    <p>Difference: {{ differenceBalance }}</p>
+    <h3>Opening balance: {{ openingBalance }}</h3>
+    <h3>Closing balance: {{ closingBalance }}</h3>
+    <h3>Difference: {{ differenceBalance }}</h3>
     <div v-if="showBusinessUnitsView">
       <div v-for="businessUnit in allBusinessUnits" v-bind:key="businessUnit.name">
         <BusinessUnit
@@ -38,12 +38,12 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, inject, onMounted, ref, watch } from 'vue'
+import { computed, inject, onMounted, ref, watch } from 'vue'
 import { fetchDataFromFirebase } from '@/stores/modules/apiModule'
 import BalanceItem from '../components/BalanceItem.vue'
 import BusinessUnit from '../components/BusinessUnit.vue'
 import calculateBusinessUnitBalance from '../utilities/CalculateBusinessUnitBalance'
-import { type IGlobalState } from '../components/Interfaces'
+import { type IGlobalState, type IBalance, type IBalanceValue } from '../components/Interfaces'
 import filterBalanceByPeriod from '@/utilities/FilterBalanceByPeriod'
 import calculateTotalBalance from '@/utilities/CalculateTotalBalance'
 
@@ -54,7 +54,7 @@ interface Props {
   selectedCustomer: string
 }
 
-export default defineComponent({
+export default {
   name: 'BalanceView',
   components: {
     BalanceItem,
@@ -68,18 +68,14 @@ export default defineComponent({
   },
   setup(props: Props, { emit }) {
     const globalState = inject<IGlobalState>('globalState')
-
     const balanceData = ref<any>(null)
     const isLoading = ref<boolean>(false)
     const error = ref<string | null>(null)
-
-    const openingBalance = ref(0)
-    const closingBalance = ref(0)
-    const differenceBalance = ref(openingBalance.value - closingBalance.value)
-
+    const openingBalance = ref<number>(0)
+    const closingBalance = ref<number>(0)
+    const differenceBalance = ref<number>(0)
     const uniqueBusinessUnits = new Set<string>()
-    const allBusinessUnits = ref<any>([])
-
+    const allBusinessUnits = ref<IBalanceValue[]>([])
     const uniqueMarkets = new Set<string>()
     const uniqueCustomers = new Set<string>()
     const allCustomers = ref<any>([])
@@ -87,31 +83,33 @@ export default defineComponent({
 
     const setBalanceData = (newValue: any) => {
       balanceData.value = newValue
-
       // refactor this later
       for (const index in balanceData.value) {
-        const data = balanceData.value[index]
+        const data: IBalance = balanceData.value[index]
         uniqueBusinessUnits.add(data.businessUnit)
         uniqueMarkets.add(data.market)
         uniqueCustomers.add(data.customerId)
       }
-      emit('markets', Array.from(uniqueMarkets))
-      emit('businessUnits', Array.from(uniqueBusinessUnits))
-      emit('customers', Array.from(uniqueCustomers))
-      globalState?.setRetailUnit(Array.from(uniqueMarkets)[0])
-
-      const balanceByPeriod = filterBalanceByPeriod(balanceData, globalState?.period)
+      const emitUniqueMarkets: string[] = Array.from(uniqueMarkets)
+      const emitUniqueBusinessUnits: string[] = Array.from(uniqueBusinessUnits)
+      const emitUniqueCustomers: string[] = Array.from(uniqueCustomers)
+      emit('markets', emitUniqueMarkets)
+      emit('businessUnits', emitUniqueBusinessUnits)
+      emit('customers', emitUniqueCustomers)
+      const initialRetailUnit: string = Array.from(uniqueMarkets)[0]
+      globalState?.setRetailUnit(initialRetailUnit)
+      const balanceByPeriod: IBalance[] = filterBalanceByPeriod(balanceData, props.period)
       allBusinessUnits.value = calculateBusinessUnitBalance(
         uniqueBusinessUnits,
         balanceByPeriod,
         ''
       )
-      const balanceResults = calculateTotalBalance(allBusinessUnits)
+
+      const balanceResults: number[] = calculateTotalBalance(allBusinessUnits)
       openingBalance.value = balanceResults[0]
       closingBalance.value = balanceResults[1]
       differenceBalance.value = balanceResults[2]
     }
-
     const fetchFromAPI = async () => {
       isLoading.value = true
       try {
@@ -122,45 +120,33 @@ export default defineComponent({
         isLoading.value = false
       }
     }
-
     watch(props, () => {
-      const newBalancePeriod = filterBalanceByPeriod(balanceData, props.period)
+      const newBalancePeriod: IBalance[] = filterBalanceByPeriod(balanceData, props.period)
       allBusinessUnits.value = calculateBusinessUnitBalance(
         uniqueBusinessUnits,
         newBalancePeriod,
         props.selectedRetailUnit
       )
-
       // Show the opening and closing balance for unique customers
-      const eventsInBusinessUnit = newBalancePeriod.filter(
+      const eventsInBusinessUnit: IBalance[] = newBalancePeriod.filter(
         (balanceEvent: { businessUnit: string }) => {
           return balanceEvent.businessUnit === props.selectedBusinessUnit
         }
       )
-
       // get unique customer ids in business unit
       const uniqueCustomersInBusinessUnit = new Set<string>()
       eventsInBusinessUnit.map((balanceEvent: { customerId: string }) => {
         uniqueCustomersInBusinessUnit.add(balanceEvent.customerId)
       })
-
-      let customersBalance: {
-        name: string
-        openingBalance: number
-        closingBalance: number
-        differenceBalance: number
-      }[] = []
-
+      let customersBalance: IBalanceValue[] = []
       Array.from(uniqueCustomersInBusinessUnit).forEach((customerId) => {
-        const filteredEventsBasedOnCustomer = eventsInBusinessUnit.filter(
+        const filteredEventsBasedOnCustomer: IBalance[] = eventsInBusinessUnit.filter(
           (balanceEvent: { customerId: string }) => {
             return balanceEvent.customerId === customerId
           }
         )
-
         let unitOpeningBalance = 0
         let unitClosingBalance = 0
-
         filteredEventsBasedOnCustomer.map((balanceEvent: { type: string; value: number }) => {
           if (balanceEvent.type === 'INCREASED') {
             unitOpeningBalance += balanceEvent.value
@@ -168,9 +154,7 @@ export default defineComponent({
             unitClosingBalance += balanceEvent.value
           }
         })
-
         const unitDifferenceBalance = unitOpeningBalance - unitClosingBalance
-
         customersBalance.push({
           name: customerId,
           openingBalance: unitOpeningBalance,
@@ -187,11 +171,9 @@ export default defineComponent({
           balanceEvent.market === props.selectedRetailUnit
         )
       })
-
       //market/period = calculateTotalBalance(allBusinessUnits)
       //market/period/businessUnit = calculateTotalBalance(allCustomers)
       //market/period/customer
-
       if (props.selectedCustomer !== '') {
         const balanceResult = calculateBusinessUnitBalance(
           new Set<string>().add(props.selectedCustomer),
@@ -213,17 +195,13 @@ export default defineComponent({
         differenceBalance.value = balanceResult[2]
       }
     })
-
     const showBusinessUnitsView = computed(() => {
       return props.selectedBusinessUnit === '' && props.selectedCustomer === ''
     })
-
     const showCustomersView = computed(() => {
       return props.selectedRetailUnit !== '' && props.selectedBusinessUnit !== ''
     })
-
     onMounted(fetchFromAPI)
-
     return {
       balanceData,
       allBusinessUnits,
@@ -238,7 +216,7 @@ export default defineComponent({
       error
     }
   }
-})
+}
 </script>
 
 <style scoped>
