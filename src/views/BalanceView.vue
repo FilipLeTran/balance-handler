@@ -223,5 +223,6 @@ export default {
 .balance-events {
   display: flex;
   min-width: 100vw;
+  justify-content: center;
 }
 </style>

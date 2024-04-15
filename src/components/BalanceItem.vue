@@ -50,6 +50,7 @@ export default defineComponent({
   display: flex;
   flex-wrap: wrap;
   flex-direction: column;
+  justify-content: center;
   border: solid;
   margin: 1rem;
 }
