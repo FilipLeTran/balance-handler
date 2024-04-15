@@ -1,6 +1,6 @@
 import { initializeApp } from 'firebase/app'
 import 'firebase/database'
-import { getDatabase, ref, onValue, child, get } from 'firebase/database'
+import { getDatabase, ref, onValue } from 'firebase/database'
 
 // Initialize Firebase with your Firebase project configuration
 const firebaseConfig = {

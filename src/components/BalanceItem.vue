@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import convertDate from '../utilities/ConvertDate.ts'
+import convertDate from '../utilities/ConvertDate'
 
 defineProps<{
   eventId?: string
@@ -9,14 +9,12 @@ defineProps<{
   balanceValue?: number
   eventType?: string
 }>()
-
-const balanceContainerClass = ref('balance-container')
 </script>
 
 <template>
   <div
     :style="[eventType === 'INCREASED' ? { borderColor: 'green' } : { borderColor: 'red' }]"
-    :class="balanceContainerClass"
+    class="balance-container"
   >
     <div>
       <h3>Event ID</h3>
@@ -33,8 +31,8 @@ const balanceContainerClass = ref('balance-container')
       <p>{{ customerId }}</p>
     </div>
     <div>
-      <h3>Adjustment</h3>
-      <p>{{ balanceValue }}</p>
+      <h3>Value</h3>
+      <p>{{ `${eventType === 'INCREASED' ? `+${balanceValue}` : `-${balanceValue}`}` }}</p>
     </div>
   </div>
 </template>
@@ -54,6 +52,15 @@ export default defineComponent({
   flex-direction: column;
   border: solid;
   margin: 1rem;
+}
+
+@media (min-width: 768px) {
+  .balance-container {
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
+    min-width: 700px;
+  }
 }
 
 .balance-container div {
